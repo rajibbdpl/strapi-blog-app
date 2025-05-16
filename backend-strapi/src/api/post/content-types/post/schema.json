@@ -1,0 +1,51 @@
+{
+  "kind": "collectionType",
+  "collectionName": "posts",
+  "info": {
+    "singularName": "post",
+    "pluralName": "posts",
+    "displayName": "Posts"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "Title": {
+      "type": "string",
+      "regex": "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d\\s\\-_,.!?'\"():]{3,100}$",
+      "minLength": 5,
+      "required": true,
+      "maxLength": 200
+    },
+    "coverImage": {
+      "allowedTypes": [
+        "files",
+        "images"
+      ],
+      "type": "media",
+      "multiple": false,
+      "required": true
+    },
+    "Content": {
+      "type": "text",
+      "required": true,
+      "maxLength": 2000,
+      "minLength": 10
+    },
+    "displayImages": {
+      "allowedTypes": [
+        "images",
+        "files"
+      ],
+      "type": "media",
+      "multiple": true,
+      "required": true
+    },
+    "author": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "posts"
+    }
+  }
+}
