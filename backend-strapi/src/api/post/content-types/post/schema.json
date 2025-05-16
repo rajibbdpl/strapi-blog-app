@@ -41,7 +41,11 @@
       "multiple": true,
       "required": true
     },
-    "author": {
+    "publishedDate": {
+      "type": "datetime",
+      "required": false
+    },
+    "user": {
       "type": "relation",
       "relation": "manyToOne",
       "target": "plugin::users-permissions.user",
