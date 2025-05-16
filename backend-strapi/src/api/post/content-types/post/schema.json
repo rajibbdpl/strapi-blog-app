@@ -4,7 +4,8 @@
   "info": {
     "singularName": "post",
     "pluralName": "posts",
-    "displayName": "Posts"
+    "displayName": "Posts",
+    "description": ""
   },
   "options": {
     "draftAndPublish": true
@@ -12,19 +13,19 @@
   "attributes": {
     "Title": {
       "type": "string",
-      "regex": "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d\\s\\-_,.!?'\"():]{3,100}$",
+      "regex": "^[A-Za-z\\d\\s\\-_,.!?'\"():]{5,200}$",
       "minLength": 5,
       "required": true,
       "maxLength": 200
     },
     "coverImage": {
+      "type": "media",
+      "multiple": false,
+      "required": true,
       "allowedTypes": [
         "files",
         "images"
-      ],
-      "type": "media",
-      "multiple": false,
-      "required": true
+      ]
     },
     "Content": {
       "type": "text",
@@ -33,13 +34,13 @@
       "minLength": 10
     },
     "displayImages": {
+      "type": "media",
+      "multiple": true,
+      "required": true,
       "allowedTypes": [
         "images",
         "files"
-      ],
-      "type": "media",
-      "multiple": true,
-      "required": true
+      ]
     },
     "publishedDate": {
       "type": "datetime",
