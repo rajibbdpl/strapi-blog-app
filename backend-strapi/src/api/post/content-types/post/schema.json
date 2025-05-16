@@ -33,15 +33,6 @@
       "maxLength": 2000,
       "minLength": 10
     },
-    "displayImages": {
-      "type": "media",
-      "multiple": true,
-      "required": true,
-      "allowedTypes": [
-        "images",
-        "files"
-      ]
-    },
     "publishedDate": {
       "type": "datetime",
       "required": false

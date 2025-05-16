@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -16,18 +15,43 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import Cookies from "js-cookie";
 
 //define the data types
 const formSchema = z.object({
   Title: z.string().min(5).max(200),
   Content: z.string().min(10).max(2000),
+  coverImage: z.any(),
 });
 
-export default function ProfileForm() {
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+export default function PostForm() {
+  //grab jwt from cookie
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+     
+    //send using formdata while sending files
+    const formData = new FormData();
+    formData.append("Title", values.Title);
+    formData.append("Content", values.Content);
+    // Append the file
+    if (values.coverImage && values.coverImage.length > 0) {
+      formData.append("coverImage", values.coverImage[0]);
+    }
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API}/api/posts`, {
+      method: "POST",
+      credentials:"include",
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      console.error("Error posting:", errorData);
+      return;
+    }
+
+    const data = await res.json();
+    console.log("Post created:", data);
   }
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -39,8 +63,8 @@ export default function ProfileForm() {
   });
 
   return (
-    <div className="flex items-center justify-center mt-10">
-      <div className="max-w-[80vw] w-[50vw]">
+    <div className="flex items-center justify-center mt-10 ">
+      <div className="max-w-[80vw] w-[50vw] border p-10">
         <h1 className="text-xl font-bold mb-10 text-center">
           Create a new Post
         </h1>
@@ -62,6 +86,24 @@ export default function ProfileForm() {
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name="coverImage"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cover Image</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => field.onChange(e.target.files)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="Content"
@@ -75,7 +117,9 @@ export default function ProfileForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit">Submit</Button>
+            <Button className="w-full cursor-pointer" type="submit">
+              Add Post
+            </Button>
           </form>
         </Form>
       </div>
