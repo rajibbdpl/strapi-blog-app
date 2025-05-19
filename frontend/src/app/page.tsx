@@ -5,6 +5,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Image from "next/image";
+import Link from "next/link";
 import React from "react";
 
 type Posts = {
@@ -17,11 +18,11 @@ type Posts = {
   updatedAt: string;
   coverImage?: any;
   displayImages?: any;
-}; 
-const getPosts = async () => {
+};
+const getPosts = async (page: number = 1) => {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API}/api/posts?populate=*`
+      `${process.env.NEXT_PUBLIC_API}/api/posts?populate=*&pagination[page]=${page}&pagination[pageSize]=9`
     );
     return res.json();
   } catch (error) {
@@ -29,8 +30,17 @@ const getPosts = async () => {
   }
 };
 
-export default async function Page() {
-  const { data, meta } = await getPosts();
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: { page?: string };
+}) {
+  //default url gives string && convert it to integer
+  const currentPage = parseInt(searchParams.page || "1", 10);
+  const result = await getPosts(currentPage);
+  const { data, meta } = result;
+
+  console.log("result", result.meta.pagination);
 
   if (!data || data?.length === 0) {
     <div>No data available</div>;
@@ -62,6 +72,30 @@ export default async function Page() {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      {/* Pagination Container */}
+      <div className="flex justify-center gap-4 mt-10">
+        {/* prev button */}
+        <Link
+          href={`?page=${meta?.pagination?.page - 1}`}
+          className={`px-4 py-2 rounded bg-gray-200 ${
+            meta.pagination.page === 1 ? "pointer-events-none opacity-50" : "" //if first page
+          }`}
+        >
+          Prev
+        </Link>
+
+        <Link
+          href={`?page=${meta?.pagination?.page + 1}`}
+          className={`px-4 py-2 rounded bg-gray-200 ${
+            meta.pagination.page === meta?.pagination.pageCount
+              ? "pointer-events-none opacity-50"
+              : "" //last page
+          }`}
+        >
+          Next
+        </Link>
       </div>
     </div>
   );

@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import Cookies from "js-cookie";
 import { useEffect } from "react";
+import { toast } from "sonner";
 
 // Define the data types
 const formSchema = z.object({
@@ -41,7 +42,6 @@ export default function PostForm() {
 
       let uploadedImageId = null;
 
-      
       //image upload separately
       if (values.coverImage && values.coverImage.length > 0) {
         const uploadData = new FormData();
@@ -96,6 +96,8 @@ export default function PostForm() {
         console.error("Error creating post:", errorData);
         return;
       }
+      toast.success("Post created successfully");
+      form.reset();
 
       const postData = await postRes.json();
       console.log("Post created:", postData);
