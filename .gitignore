@@ -34,3 +34,4 @@ Thumbs.db
 
 # Docker volumes (optional if you're using Docker)
 **/pgdata/
+**/uploads/

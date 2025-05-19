@@ -17,7 +17,7 @@ type Posts = {
   updatedAt: string;
   coverImage?: any;
   displayImages?: any;
-};
+}; 
 const getPosts = async () => {
   try {
     const res = await fetch(
@@ -53,7 +53,6 @@ export default async function Page() {
                   alt={item?.coverImage?.name}
                   src={`${process.env.NEXT_PUBLIC_API}${item?.coverImage?.url}`}
                   className="object-cover"
-                  
                 />
               </div>
               <h2 className="my-5 font-semibold line-clamp-2 text-lg">

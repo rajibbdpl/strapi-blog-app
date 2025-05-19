@@ -9,11 +9,11 @@ export async function POST(request: Request) {
 
   const response = NextResponse.json({ message: "Cookie set" });
 
-  response.cookies.set("authUser", token, {
-    httpOnly: true,
+  response.cookies.set("token", token, {
+    httpOnly: false,
     secure: false,
     path: "/",
-    sameSite: "lax",
+    sameSite:"lax",
     maxAge: 60 * 60 * 24 * 2, // 2days
   });
 

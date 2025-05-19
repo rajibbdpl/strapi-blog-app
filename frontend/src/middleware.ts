@@ -5,7 +5,7 @@ export const config = {
 };
 
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get("authUser")?.value;
+  const token = request.cookies.get("token")?.value;
   const pathname = request.nextUrl.pathname;
 
   if (!token && pathname !== "/sign-in") {

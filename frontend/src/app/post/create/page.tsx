@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -16,8 +15,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import Cookies from "js-cookie";
+import { useEffect } from "react";
 
-//define the data types
+// Define the data types
 const formSchema = z.object({
   Title: z.string().min(5).max(200),
   Content: z.string().min(10).max(2000),
@@ -25,33 +25,83 @@ const formSchema = z.object({
 });
 
 export default function PostForm() {
-  //grab jwt from cookie
+  useEffect(() => {
+    const token = Cookies.get("token");
+    console.log("Client-side token:", token);
+  }, []);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-     
-    //send using formdata while sending files
-    const formData = new FormData();
-    formData.append("Title", values.Title);
-    formData.append("Content", values.Content);
-    // Append the file
-    if (values.coverImage && values.coverImage.length > 0) {
-      formData.append("coverImage", values.coverImage[0]);
+    try {
+      const token = Cookies.get("token");
+
+      if (!token) {
+        console.error("No token found in cookies");
+        return;
+      }
+
+      let uploadedImageId = null;
+
+      
+      //image upload separately
+      if (values.coverImage && values.coverImage.length > 0) {
+        const uploadData = new FormData();
+        uploadData.append("files", values.coverImage[0]);
+
+        const uploadRes = await fetch(
+          `${process.env.NEXT_PUBLIC_API}/api/upload`,
+          {
+            method: "POST",
+            body: uploadData,
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!uploadRes.ok) {
+          const error = await uploadRes.json();
+          console.error("Error uploading image:", error);
+          return;
+        }
+
+        const uploadResult = await uploadRes.json();
+
+        if (uploadResult && uploadResult.length > 0) {
+          uploadedImageId = uploadResult[0].id;
+        }
+      }
+
+      const postPayload = {
+        data: {
+          Title: values.Title,
+          Content: values.Content,
+          ...(uploadedImageId && {
+            coverImage: uploadedImageId,
+          }),
+        },
+      };
+
+      //finally create the post with image id
+      const postRes = await fetch(`${process.env.NEXT_PUBLIC_API}/api/posts`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(postPayload),
+      });
+
+      if (!postRes.ok) {
+        const errorData = await postRes.json();
+        console.error("Error creating post:", errorData);
+        return;
+      }
+
+      const postData = await postRes.json();
+      console.log("Post created:", postData);
+    } catch (err) {
+      console.error("Unexpected error:", err);
     }
-
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API}/api/posts`, {
-      method: "POST",
-      credentials:"include",
-      body: formData,
-    });
-
-    if (!res.ok) {
-      const errorData = await res.json();
-      console.error("Error posting:", errorData);
-      return;
-    }
-
-    const data = await res.json();
-    console.log("Post created:", data);
   }
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -63,7 +113,7 @@ export default function PostForm() {
   });
 
   return (
-    <div className="flex items-center justify-center mt-10 ">
+    <div className="flex items-center justify-center mt-10">
       <div className="max-w-[80vw] w-[50vw] border p-10">
         <h1 className="text-xl font-bold mb-10 text-center">
           Create a new Post
@@ -104,6 +154,7 @@ export default function PostForm() {
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="Content"
@@ -117,6 +168,7 @@ export default function PostForm() {
                 </FormItem>
               )}
             />
+
             <Button className="w-full cursor-pointer" type="submit">
               Add Post
             </Button>
