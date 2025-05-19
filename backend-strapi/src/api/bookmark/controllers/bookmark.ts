@@ -1,64 +1,81 @@
-//we have to export and object
-//not use export default
+export default {
+  add: async (ctx) => {
+    const user = ctx.state.user;
+    const postId = ctx.params.id;
 
-export const getBookmarks = async (ctx) => {
-  const userId = ctx?.state?.user?.id;
-  if (!userId) return ctx.unauthorized("Authentication required");
+    if (!user) return ctx.unauthorized('Authentication required.');
 
-  const user = await strapi.entityService.findOne(
-    "plugin::users-permissions.user",
-    userId,
-    { populate: ["bookmarkedPosts"] }
-  );
+    try {
+      
+      const userData = await strapi.entityService.findOne(
+        'plugin::users-permissions.user',
+        user.id,
+        {
+          populate: ['bookmarks'],
+        }
+      ) as {
+        id: number;
+        bookmarks?: { id: number }[];
+      };
 
-  if (!user) return ctx.notFound("User not found");
+      const existingBookmarks = userData.bookmarks || [];
 
-  ctx.send({ bookmarkedPosts: user.bookmarkedPosts });
-};
+      const alreadyBookmarked = existingBookmarks.some(
+        (p) => p.id === Number(postId)
+      );
 
-export const addBookmark = async (ctx) => {
-  const userId = ctx?.state?.user?.id;
-  if (!userId) return ctx.unauthorized("Authentication required");
+      if (alreadyBookmarked) {
+        ctx.body = { message: 'Already bookmarked' };
+        return;
+      }
 
-  const postId = parseInt(ctx.params.postId);
+      const updatedBookmarks = [...existingBookmarks.map((b) => b.id), Number(postId)];
 
-  const user = await strapi.entityService.findOne(
-    "plugin::users-permissions.user",
-    userId,
-    { populate: ["bookmarkedPosts"] }
-  );
+      await strapi.entityService.update('plugin::users-permissions.user', user.id, {
+        data: {
+          bookmarks: updatedBookmarks as any,
+        },
+      });
 
-  const existingPostIds = user.bookmarkedPosts.map((p) => p.id);
-  if (existingPostIds.includes(postId)) {
-    return ctx.badRequest("Already bookmarked");
-  }
+      ctx.body = { message: 'Post bookmarked successfully.' };
+    } catch (err) {
+      ctx.throw(500, 'Failed to bookmark post.');
+    }
+  },
 
-  await strapi.entityService.update("plugin::users-permissions.user", userId, {
-    data: { bookmarkedPosts: [...existingPostIds, postId] },
-  });
+  remove: async (ctx) => {
+    const user = ctx.state.user;
+    const postId = ctx.params.id;
 
-  ctx.send({ message: "Post bookmarked" });
-};
+    if (!user) return ctx.unauthorized('Authentication required.');
 
-export const removeBookmark = async (ctx) => {
-  const userId = ctx?.state?.user?.id;
-  if (!userId) return ctx.unauthorized("Authentication required");
+    try {
+      const userData = await strapi.entityService.findOne(
+        'plugin::users-permissions.user',
+        user.id,
+        {
+          populate: ['bookmarks'],
+        }
+      ) as {
+        id: number;
+        bookmarks?: { id: number }[];
+      };
 
-  const postId = parseInt(ctx.params.postId);
+      const existingBookmarks = userData.bookmarks || [];
 
-  const user = await strapi.entityService.findOne(
-    "plugin::users-permissions.user",
-    userId,
-    { populate: ["bookmarkedPosts"] }
-  );
+      const updatedBookmarks = existingBookmarks
+        .filter((p) => p.id !== Number(postId))
+        .map((b) => b.id);
 
-  const updated = user.bookmarkedPosts
-    .map((p) => p.id)
-    .filter((id) => id !== postId);
+      await strapi.entityService.update('plugin::users-permissions.user', user.id, {
+        data: {
+          bookmarks: updatedBookmarks as any,
+        },
+      });
 
-  await strapi.entityService.update("plugin::users-permissions.user", userId, {
-    data: { bookmarkedPosts: updated },
-  });
-
-  ctx.send({ message: "Post unbookmarked" });
+      ctx.body = { message: 'Post unbookmarked successfully.' };
+    } catch (err) {
+      ctx.throw(500, 'Failed to unbookmark post.');
+    }
+  },
 };

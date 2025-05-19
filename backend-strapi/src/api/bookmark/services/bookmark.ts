@@ -1,0 +1,5 @@
+/**
+ * bookmark service
+ */
+
+export default () => ({});

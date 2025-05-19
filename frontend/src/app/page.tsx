@@ -1,3 +1,5 @@
+import Bookmark from "@/components/Bookmark";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -19,6 +21,7 @@ type Posts = {
   coverImage?: any;
   displayImages?: any;
 };
+
 const getPosts = async (page: number = 1) => {
   try {
     const res = await fetch(
@@ -46,8 +49,13 @@ export default async function Page({
     <div>No data available</div>;
   }
 
+ 
+
   return (
     <div className="flex items-center justify-center flex-col my-10">
+      <Button asChild>
+        <Link href={`/post/create`}>Create Post</Link>
+      </Button>
       <h1 className="text-3xl font-semibold">All the Blog Posts</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:grid-cols-3">
         {data.map((item: Posts) => (
@@ -69,6 +77,7 @@ export default async function Page({
                 {item.Title}
               </h2>
               <p className="line-clamp-4">{item?.Content}</p>
+              <Bookmark id={item.id}/>
             </CardContent>
           </Card>
         ))}

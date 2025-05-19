@@ -1,32 +1,22 @@
-export default [
-  {
-    method: "GET",
-    path: "/bookmarks",
-    handler: "bookmark.getBookmarks", 
-    config: {
-      auth: {
-        scope: ["plugin::users-permissions.user.me"],
+export default {
+  routes: [
+    {
+      method: 'POST',
+      path: '/bookmark/:id',
+      handler: 'bookmark.add',
+      config: {
+        policies: [],
+        middlewares: [],
       },
     },
-  },
-  {
-    method: "POST",
-    path: "/bookmarks/:postId",
-    handler: "bookmark.addBookmark",
-    config: {
-      auth: {
-        scope: ["plugin::users-permissions.user.me"],
+    {
+      method: 'DELETE',
+      path: '/bookmark/:id',
+      handler: 'bookmark.remove',
+      config: {
+        policies: [],
+        middlewares: [],
       },
     },
-  },
-  {
-    method: "DELETE",
-    path: "/bookmarks/:postId",
-    handler: "bookmark.removeBookmark",
-    config: {
-      auth: {
-        scope: ["plugin::users-permissions.user.me"],
-      },
-    },
-  },
-];
+  ],
+};

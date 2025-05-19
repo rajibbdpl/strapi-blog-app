@@ -43,11 +43,11 @@
       "target": "plugin::users-permissions.user",
       "inversedBy": "posts"
     },
-    "bookmarkedBy": {
+    "users": {
       "type": "relation",
-      "relation": "manyToOne",
+      "relation": "manyToMany",
       "target": "plugin::users-permissions.user",
-      "inversedBy": "bookmarkedPosts"
+      "mappedBy": "bookmarks"
     }
   }
 }

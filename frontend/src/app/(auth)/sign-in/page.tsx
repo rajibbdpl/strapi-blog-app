@@ -44,7 +44,7 @@ export default function ProfileForm() {
         toast.error("Invalid credentials");
         return;
       }
-      // console.log("data", data);
+      console.log("data", data);
       const jwt = data.jwt;
 
       const cookieRes = await fetch("/api/set-cookie", {
@@ -60,9 +60,8 @@ export default function ProfileForm() {
       }
 
       toast.success("Welcome back user");
-      router.push("/");
+      // router.push("/");
 
-      toast.success("Welcome back user");
       router.push("/");
     } catch (error: any) {
       console.log("Error in login", error);
